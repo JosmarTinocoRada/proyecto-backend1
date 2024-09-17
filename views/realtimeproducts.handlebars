@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos en Tiempo Real</title>
+</head>
+<body>
+    <h1>Lista de Productos (Tiempo Real)</h1>
+    <ul id="product-list">
+        {{#each products}}
+        <li id="product-{{this.id}}">ID: {{this.id}} - Nombre: {{this.name}} - Precio: {{this.price}} - Stock: {{this.stock}}</li>
+        {{/each}}
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        
+        socket.on('updateProducts', (products) => {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+            products.forEach(product => {
+                const listItem = document.createElement('li');
+                listItem.id = `product-${product.id}`;
+                listItem.textContent = `ID: ${product.id} - Nombre: ${product.name} - Precio: ${product.price} - Stock: ${product.stock}`;
+                productList.appendChild(listItem);
+            });
+        });
+
+        
+        socket.on('productAdded', (product) => {
+            const productList = document.getElementById('product-list');
+            const listItem = document.createElement('li');
+            listItem.id = `product-${product.id}`;
+            listItem.textContent = `ID: ${product.id} - Nombre: ${product.name} - Precio: ${product.price} - Stock: ${product.stock}`;
+            productList.appendChild(listItem);
+        });
+
+        
+        socket.on('productDeleted', (productId) => {
+            const productListItem = document.getElementById(`product-${productId}`);
+            if (productListItem) {
+                productListItem.remove();
+            }
+        });
+    </script>
+</body>
+</html>
