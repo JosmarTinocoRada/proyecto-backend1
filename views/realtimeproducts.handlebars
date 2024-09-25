@@ -22,7 +22,7 @@
 <script>
     const socket = io();
 
-    // Escuchar el evento para nuevos productos
+    
     socket.on('newProduct', (newProduct) => {
         const productList = document.getElementById('productList');
         const li = document.createElement('li');
@@ -31,7 +31,7 @@
         productList.appendChild(li);
     });
 
-    // Escuchar el evento para eliminar productos
+    
     socket.on('deleteProduct', (productId) => {
         const productList = document.getElementById('productList');
         const itemToDelete = Array.from(productList.children).find(li => li.querySelector('.deleteButton').dataset.id == productId);
@@ -53,14 +53,13 @@
             category: document.getElementById('category').value,
         };
 
-        // Enviar el nuevo producto al servidor
+       
         socket.emit('createProduct', newProduct);
 
-        // Limpiar el formulario
         event.target.reset();
     });
 
-    // Manejar la eliminación de productos
+  
     document.getElementById('productList').addEventListener('click', (event) => {
         if (event.target.classList.contains('deleteButton')) {
             const productId = event.target.dataset.id;

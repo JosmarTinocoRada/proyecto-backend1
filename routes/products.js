@@ -11,13 +11,13 @@ const generateId = () => {
     return products.length > 0 ? products[products.length - 1].id + 1 : 1;
 };
 
-let io; // Variable para la instancia de Socket.IO
+let io; 
 
 const initSocket = (socketIO) => {
     io = socketIO;
 };
 
-// Obtener todos los productos
+
 router.get('/', (req, res) => {
     const limit = parseInt(req.query.limit);
     if (limit && limit > 0) {
@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
     res.json(products);
 });
 
-// Obtener un producto por ID
+
 router.get('/:pid', (req, res) => {
     const productId = parseInt(req.params.pid);
     const product = products.find(p => p.id === productId);
@@ -82,7 +82,7 @@ router.put('/:pid', (req, res) => {
     }
 });
 
-// Eliminar un producto
+
 router.delete('/:pid', (req, res) => {
     const productId = parseInt(req.params.pid);
     const productIndex = products.findIndex(p => p.id === productId);
@@ -94,11 +94,11 @@ router.delete('/:pid', (req, res) => {
             io.emit('deleteProduct', productId);
         }
 
-        res.status(204).send(); // Sin contenido
+        res.status(204).send(); 
     } else {
         res.status(404).json({ error: 'Producto no encontrado' });
     }
 });
 
-// Exportar solo el router y la función initSocket
+
 module.exports = { router, initSocket };
