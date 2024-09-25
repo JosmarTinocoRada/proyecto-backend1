@@ -29,7 +29,7 @@ const { router: viewsRouter, initSocket: initViewSocket } = require('./routes/vi
 
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
-app.use('/', viewsRouter);
+app.use('/api/viewsrouter', viewsRouter);
 
 const server = createServer(app);
 const io = new Server(server);

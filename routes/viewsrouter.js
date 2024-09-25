@@ -12,11 +12,11 @@ const initSocket = (socketIO) => {
 };
 
 router.get('/', (req, res) => {
-    res.render('home', { products, title: 'Home' });
+    res.render('home', { products, title: 'Home', message: 'Bienvenido a la página principal'});
 });
 
 
-router.get('/realtimeproducts', (req, res) => {
+router.get('/products', (req, res) => {
     res.render('realTimeProducts', { products, title: 'Productos en Tiempo Real' });
 });
 
