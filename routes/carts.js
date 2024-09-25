@@ -7,6 +7,7 @@ const generateId = () => {
     return carts.length > 0 ? carts[carts.length - 1].id + 1 : 1;
 };
 
+// Crear un nuevo carrito
 router.post('/', (req, res) => {
     const newCart = {
         id: generateId(),
@@ -17,7 +18,7 @@ router.post('/', (req, res) => {
     res.status(201).json(newCart);
 });
 
-
+// Obtener un carrito por ID
 router.get('/:cid', (req, res) => {
     const cartId = parseInt(req.params.cid);
     const cart = carts.find(c => c.id === cartId);
@@ -29,7 +30,7 @@ router.get('/:cid', (req, res) => {
     }
 });
 
-
+// Agregar un producto a un carrito
 router.post('/:cid/product/:pid', (req, res) => {
     const cartId = parseInt(req.params.cid);
     const productId = parseInt(req.params.pid);
@@ -51,4 +52,5 @@ router.post('/:cid/product/:pid', (req, res) => {
     }
 });
 
+// Exportar solo el router
 module.exports = router;

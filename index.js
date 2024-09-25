@@ -5,100 +5,45 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
-
 const PORT = 8080;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.engine('handlebars', exphbs.engine());
+// Configuración de Handlebars
+app.engine('handlebars', exphbs.engine()); // Usa el método .engine() para configurarlo
 app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views')); // Asegúrate de que la carpeta 'views' esté en la raíz del proyecto
 
-let products = [
-    { id: 1, name: 'Producto 1', price: 100, stock: 10 },
-    { id: 2, name: 'Producto 2', price: 200, stock: 20 }
-];
+// Middleware para JSON
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); 
 
-app.use('/api/products', require('./routes/products'));
-app.use('/api/carts', require('./routes/carts'));
+// Importar las rutas
+const { router, initSocket } = require('./routes/viewsrouter'); 
+app.use('/', router); 
 
-app.get('/', (req, res) => {
-    res.render('home', { products });
-});
+app.use('/api/products', require('./routes/products')); // Ajustar según la ubicación real de products.js
+app.use('/api/carts', require('./routes/carts')); // Ajustar según la ubicación real de carts.js
 
-app.get('/realtimeproducts', (req, res) => {
-    res.render('realTimeProducts', { products });
-});
+// Crear servidor HTTP y configurar Socket.IO
+const server = createServer(app);
+const io = new Server(server);
 
-
-app.post('/api/products', (req, res) => {
-    const { name, price, stock } = req.body;
-
-    const newProduct = {
-        id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
-        name,
-        price,
-        stock
-    };
-
-    products.push(newProduct);
-
-    
-    io.emit('productAdded', newProduct);
-
-    res.status(201).json(newProduct);
-});
-
-app.delete('/api/products/:id', (req, res) => {
-    const productId = parseInt(req.params.id);
-
-    products = products.filter(p => p.id !== productId);
-
-    
-    io.emit('productDeleted', productId);
-
-    res.status(204).send();
-});
-
-
+// Manejar eventos de WebSocket
 io.on('connection', (socket) => {
-    console.log('Cliente conectado');
+    console.log('Nuevo cliente conectado');
 
-    socket.emit('updateProducts', products);
-
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado');
+    socket.on('newProduct', (product) => {
+        io.emit('productAdded', product);
     });
 
-    
-    socket.on('addProduct', (data) => {
-        const { name, price, stock } = data;
-        const newProduct = {
-            id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
-            name,
-            price,
-            stock
-        };
-
-        products.push(newProduct);
-
-        
-        io.emit('productAdded', newProduct);
-    });
-
-    
-    socket.on('deleteProduct', (data) => {
-        const productId = parseInt(data.id);
-        products = products.filter(p => p.id !== productId);
-
-        
+    socket.on('deleteProduct', (productId) => {
         io.emit('productDeleted', productId);
     });
 });
 
-httpServer.listen(PORT, () => {
+// Inicializar el socket en el router de vistas
+initSocket(io); // Pasar la instancia de Socket.IO a la función de inicialización
+
+// Iniciar el servidor
+server.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

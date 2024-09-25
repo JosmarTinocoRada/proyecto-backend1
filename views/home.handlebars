@@ -1,0 +1,9 @@
+{{!-- Indica que esta vista utiliza el layout definido --}}
+{{!< layout}}
+
+<h2>Lista de Productos</h2>
+<ul id="productList">
+    {{#each products}}
+        <li>{{this.name}} - ${{this.price}}</li>
+    {{/each}}
+</ul>

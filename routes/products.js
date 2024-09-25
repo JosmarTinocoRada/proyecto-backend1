@@ -7,11 +7,17 @@ let products = [
     { id: 3, name: 'Hamburguesa', description: 'Descripción 3', code: '003', price: 300, status: true, stock: 30, category: 'Comidas', thumbnails: [] },
 ];
 
-
 const generateId = () => {
     return products.length > 0 ? products[products.length - 1].id + 1 : 1;
 };
 
+let io; // Variable para la instancia de Socket.IO
+
+const initSocket = (socketIO) => {
+    io = socketIO;
+};
+
+// Obtener todos los productos
 router.get('/', (req, res) => {
     const limit = parseInt(req.query.limit);
     if (limit && limit > 0) {
@@ -20,6 +26,7 @@ router.get('/', (req, res) => {
     res.json(products);
 });
 
+// Obtener un producto por ID
 router.get('/:pid', (req, res) => {
     const productId = parseInt(req.params.pid);
     const product = products.find(p => p.id === productId);
@@ -30,6 +37,7 @@ router.get('/:pid', (req, res) => {
     }
 });
 
+// Crear un nuevo producto
 router.post('/', (req, res) => {
     const { title, description, code, price, stock, category, thumbnails } = req.body;
 
@@ -43,17 +51,22 @@ router.post('/', (req, res) => {
         description,
         code,
         price,
-        status: true, 
+        status: true,
         stock,
         category,
-        thumbnails: thumbnails || [] 
+        thumbnails: thumbnails || []
     };
 
     products.push(newProduct);
+
+    if (io) {
+        io.emit('newProduct', newProduct);
+    }
+
     res.status(201).json(newProduct);
 });
 
-
+// Actualizar un producto
 router.put('/:pid', (req, res) => {
     const productId = parseInt(req.params.pid);
     const productIndex = products.findIndex(p => p.id === productId);
@@ -61,7 +74,6 @@ router.put('/:pid', (req, res) => {
     if (productIndex !== -1) {
         const { id, ...updateData } = req.body;
 
-        
         products[productIndex] = { ...products[productIndex], ...updateData };
 
         res.json(products[productIndex]);
@@ -70,16 +82,23 @@ router.put('/:pid', (req, res) => {
     }
 });
 
+// Eliminar un producto
 router.delete('/:pid', (req, res) => {
     const productId = parseInt(req.params.pid);
     const productIndex = products.findIndex(p => p.id === productId);
 
     if (productIndex !== -1) {
         products.splice(productIndex, 1);
+
+        if (io) {
+            io.emit('deleteProduct', productId);
+        }
+
         res.status(204).send(); // Sin contenido
     } else {
         res.status(404).json({ error: 'Producto no encontrado' });
     }
 });
 
-module.exports = router;
+// Exportar solo el router y la función initSocket
+module.exports = { router, initSocket };
