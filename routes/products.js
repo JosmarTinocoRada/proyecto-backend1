@@ -118,4 +118,29 @@ router.delete('/:pid', async (req, res) => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', async () => {
+            const productId = button.getAttribute('data-id');
+            await fetch(`/api/carts/add`, { method: 'POST', body: JSON.stringify({ productId }) });
+            alert('Producto añadido al carrito');
+        });
+    });
+
+    document.querySelectorAll('.remove-from-cart').forEach(button => {
+        button.addEventListener('click', async () => {
+            const productId = button.getAttribute('data-id');
+            await fetch(`/api/carts/remove`, { method: 'DELETE', body: JSON.stringify({ productId }) });
+            alert('Producto eliminado del carrito');
+            location.reload();
+        });
+    });
+
+    document.querySelector('.clear-cart')?.addEventListener('click', async () => {
+        await fetch(`/api/carts/clear`, { method: 'DELETE' });
+        alert('Carrito vaciado');
+        location.reload();
+    });
+});
+
 module.exports = { router, initSocket };
